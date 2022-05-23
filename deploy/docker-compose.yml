@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  #RABBITMQ
+  rabbitmq:
+    container_name: "rabbitmq"
+    image: rabbitmq:3.8-management-alpine
+    environment: 
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
+    ports:
+      # AMQP protocol port
+      - '5672:5672' 
+      # HTTP management UI
+      - '15672:15672'
+    networks:
+      - bulkmail
+      
+  #MONGO
+  mongodb:
+    container_name: "mongo"
+    image: mongo
+    #command: --replSet rs0
+    ports:
+      - 27017:27017
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MONGO_INITDB_DATABASE=test
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    volumes:
+      - ./mongo-entrypoint:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    networks:
+      - bulkmail
+
+#NETWORKS
+networks:
+  bulkmail:
+    driver: bridge
