@@ -4,6 +4,7 @@ import(
 	//Local Packages
 	"net/http"
 	"encoding/json"
+	
 	//ThisProject Packages
 	models "bulkmail/packages/Data/Models"
 	myLog "bulkmail/packages/Utils/Logger"
@@ -19,7 +20,5 @@ func AddToQueue(w http.ResponseWriter, r *http.Request){
 		myLog.FailOnError(err, "Failed data can't converting")
 	}
 
-	//go rabbit.GetInstance()
-	//rabbit.AddToQueue(body)
 	rabbit.AddToQueue(body)
 }

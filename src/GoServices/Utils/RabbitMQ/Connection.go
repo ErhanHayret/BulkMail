@@ -3,6 +3,7 @@ package RabbitMQ
 import(
 	//This Project Packages
 	myLog "bulkmail/packages/Utils/Logger"
+
 	//Git Packages
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -37,5 +38,5 @@ func AddToQueue(body []byte){
 			Body: body,
 		})
 	myLog.FailOnError(er, "Failed to publish a message")
-	myLog.PrintData("Sended this data =>", body)//Logger
+	myLog.PrintData("Sended this data => ", body)//Logger
 }
