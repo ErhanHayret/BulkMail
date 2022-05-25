@@ -5,7 +5,7 @@ import(
 )
 
 type Mail struct {
-	Id				primitive.ObjectID	`json:"id,omitempty"	bson:"_id"`
+	Id		primitive.ObjectID	`json:"id,omitempty"	bson:"_id"`
 	MailSubject		string				`json:"mailSubject" 	bson:"mail_subject"`
 	MailText		string 				`json:"mailText"		bson:"mail_test"`
 	SenderEmail		string				`json:"senderEmail" 	bson:"sender_email"`
