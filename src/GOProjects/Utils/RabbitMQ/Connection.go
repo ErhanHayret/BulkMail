@@ -38,5 +38,5 @@ func AddToQueue(body []byte){
 			Body: body,
 		})
 	myLog.FailOnError(er, "Failed to publish a message")
-	myLog.PrintData("Sended this data => ", body)//Logger
+	myLog.PrintData("Queued this data => ", body)//Logger
 }
