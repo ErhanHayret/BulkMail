@@ -2,13 +2,13 @@ package Consumer
 
 import(
 	//Local Packages
-	"log"
 	"sync"
+	"encoding/json"
 
 	//This Project Packages
 	myMongo "bulkmail/packages/DataAccess/MongoDb"
-	//"bulkmail/packages/Data/Models"
-	myLogger "bulkmail/packages/Utils/Looger"
+	"bulkmail/packages/Data/Models"
+	myLogger "bulkmail/packages/Utils/Logger"
 
 	//Git Packages
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -52,9 +52,14 @@ func Consumer(wg *sync.WaitGroup) {
 	go func() {
 		for d := range msgs {
 			myLogger.PrintData("Received a message => ", d.Body)
-
-			myMongo.GetClient("test","testcol")
-			myMongo.InsertOne("test")
+			var mail Models.Mail
+			err := json.Unmarshal(d.Body,&mail)
+			if err != nil {
+				myLogger.PrintData("Consumer can't convert data", err)
+			}
+			
+			collection := myMongo.GetClient("MailDb", "Mail")
+			myMongo.InsertOne(collection, mail)
 		}
 	}()
 

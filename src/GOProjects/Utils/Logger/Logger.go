@@ -6,9 +6,13 @@ import(
 )
 
 func FailOnError(err error, msg string) {
-	if err != nil {
+	if err != nil{
 		log.Panicf(" [MESSAGE] %s [ERROR] %s", msg, err)
 	}
+}
+
+func ErrorPrint(msg string){
+	log.Printf(" [ERROR] %s", msg)
 }
 
 func PrintData(str string, data any){
