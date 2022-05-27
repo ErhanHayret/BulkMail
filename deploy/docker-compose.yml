@@ -28,8 +28,8 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
       - MONGO_INITDB_DATABASE=test
-    volumes:
-      - ./mongo-entrypoint:/docker-entrypoint-initdb.d
+    #volumes:
+      #- ./mongo-entrypoint:/docker-entrypoint-initdb.d
     restart: unless-stopped
     networks:
       - bulkmail

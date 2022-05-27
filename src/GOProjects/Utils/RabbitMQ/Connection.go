@@ -1,10 +1,8 @@
 package RabbitMQ
 
 import(
-	//This Project Packages
 	myLog "bulkmail/packages/Utils/Logger"
 
-	//Git Packages
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -26,7 +24,9 @@ func AddToQueue(body []byte){
 		false, 		//no-wait
 		nil, 		//arguments
 	)
+
 	myLog.FailOnError(err, "Failed to declare a queue")
+
 	//Publish data
 	er := ch.Publish(
 		"", 	//exchange
@@ -37,6 +37,6 @@ func AddToQueue(body []byte){
 			ContentType: "text/plain",
 			Body: body,
 		})
+
 	myLog.FailOnError(er, "Failed to publish a message")
-	myLog.PrintData("Queued this data => ", body)//Logger
 }

@@ -1,16 +1,13 @@
 package WebAPI
 
 import(
-    //Local Packages
     "net/http"
     "log"
     "sync"
 
-    //This Project Packages
     "bulkmail/packages/Business"
     eLog "bulkmail/packages/Utils/Logger"
 
-    //Online Packages
     "github.com/gorilla/mux"
 )
 

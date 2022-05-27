@@ -7,7 +7,7 @@ import(
 
 func FailOnError(err error, msg string) {
 	if err != nil{
-		log.Panicf(" [MESSAGE] %s [ERROR] %s", msg, err)
+		log.Printf(" [MESSAGE] %s [ERROR] %s", msg, err)
 	}
 }
 

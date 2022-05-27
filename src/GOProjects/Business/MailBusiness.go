@@ -1,55 +1,66 @@
 package Business
 
 import(
-	//Local Packages
 	"net/http"
 	"encoding/json"
 	"io/ioutil"
 	
-	//ThisProject Packages
+	"github.com/gorilla/mux"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	model	"bulkmail/packages/Data/Models"
-	eLog 	"bulkmail/packages/Utils/Logger"
 	rabbit 	"bulkmail/packages/Utils/RabbitMQ"
 	mongo "bulkmail/packages/DataAccess/MongoDb"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	//Online Packages
-	"github.com/gorilla/mux"
 )
 
-var collection = mongo.GetClient("MailDb", "Mail")
+var collection, dbResponse = mongo.GetClient("MailDb", "Mail")
 
 func AddToQueue(w http.ResponseWriter, r *http.Request){
 	
-	reqBody, _ := ioutil.ReadAll(r.Body)
+	var result model.StatusResult
 	var mail model.Mail 
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
 	json.Unmarshal(reqBody, &mail)
 	mail.Id=primitive.NewObjectID()
 	body, err := json.Marshal(mail)
 	if err != nil{
-		eLog.FailOnError(err, "Failed data can't converting")
+		result.Error = err
+		result.Message = "MailBusiness -> AddToQueue => Failed data can't converting"
+		result.Status = false
 	}
-
 	rabbit.AddToQueue(body)
+	json.NewEncoder(w).Encode(result)
 }
 
 func GetAllMails(w http.ResponseWriter, r *http.Request){
-	//collection := mongo.GetClient("MailDb", "Mail")
-	result := mongo.FindAll(collection)
+	result, dbResponse := mongo.FindAll(collection)
+	if dbResponse.Status == false {
+		json.NewEncoder(w).Encode(dbResponse)
+		return
+	}
 	json.NewEncoder(w).Encode(result)
 }
 
 func GetMailById(w http.ResponseWriter, r*http.Request){
 	vars := mux.Vars(r)
 	id := vars["id"]
-	objId, _ := primitive.ObjectIDFromHex( id)
-	result := mongo.FindById(collection, objId)
+	objId, _ := primitive.ObjectIDFromHex(id)
+	result, dbResponse := mongo.FindById(collection, objId)		
+	if dbResponse.Status == false {
+		json.NewEncoder(w).Encode(dbResponse)
+		return
+	}
 	json.NewEncoder(w).Encode(result)
 }
 
 func GetMailsBySender(w http.ResponseWriter, r*http.Request){
 	vars := mux.Vars(r)
 	adress := vars["adress"]
-	result := mongo.FindBySender(collection, adress)
+	result, dbResponse := mongo.FindBySender(collection, adress)
+	if dbResponse.Status == false {
+		json.NewEncoder(w).Encode(dbResponse)
+		return
+	}
 	json.NewEncoder(w).Encode(result)
 }

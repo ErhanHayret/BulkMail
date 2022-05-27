@@ -1,40 +1,37 @@
 package Consumer
 
 import(
-	//Local Packages
 	"sync"
 	"encoding/json"
 
-	//This Project Packages
-	myMongo "bulkmail/packages/DataAccess/MongoDb"
-	"bulkmail/packages/Data/Models"
-	myLogger "bulkmail/packages/Utils/Logger"
-
-	//Git Packages
 	amqp "github.com/rabbitmq/amqp091-go"
-	//"go.mongodb.org/mongo-driver/mongo"
+
+	"bulkmail/packages/Data/Models"
+	sender "bulkmail/packages/Utils/MailSender"
+	myMongo "bulkmail/packages/DataAccess/MongoDb"
+	myLog "bulkmail/packages/Utils/Logger"
 )
 
 func Consumer(wg *sync.WaitGroup) {
 	defer wg.Done()
 	//Rabbit Connection
 	conn, err := amqp.Dial("amqp://root:root@localhost:5672/")
-	myLogger.FailOnError(err, "Failed to connect to RabbitMQ")
+	myLog.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 	//Rabbit Channel
 	ch, err := conn.Channel()
-	myLogger.FailOnError(err, "Failed to open a channel")
+	myLog.FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
 	//Rabbit Queue
 	q, err := ch.QueueDeclare(
 		"BulkMail", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
+		false,   	// durable
+		false,   	// delete when unused
+		false,   	// exclusive
+		false,   	// no-wait
+		nil,     	// arguments
 	)
-	myLogger.FailOnError(err, "Failed to declare a queue")
+	myLog.FailOnError(err, "Failed to declare a queue")
 
 	msgs, err := ch.Consume(
 		q.Name, // queue
@@ -45,24 +42,29 @@ func Consumer(wg *sync.WaitGroup) {
 		false,  // no-wait
 		nil,    // args
 	)
-	myLogger.FailOnError(err, "Failed to register a consumer")
+	myLog.FailOnError(err, "Failed to register a consumer")
 
 	var forever chan struct{}
 	
 	go func() {
 		for d := range msgs {
-			myLogger.PrintData("Received a message => ", d.Body)
+			myLog.PrintData("Received a message => ", d.Body)
 			var mail Models.Mail
-			err := json.Unmarshal(d.Body,&mail)
+			err := json.Unmarshal(d.Body, &mail)
 			if err != nil {
-				myLogger.PrintData("Consumer can't convert data", err)
+				myLog.PrintData("Consumer can't unmarshall data", err)
 			}
-			
-			collection := myMongo.GetClient("MailDb", "Mail")
-			myMongo.InsertOne(collection, mail)
+			myLog.PrintData("recived data =>", mail)
+			collection, dbResponse := myMongo.GetClient("MailDb", "Mail")
+			if dbResponse.Status == true{
+				myMongo.InsertOne(collection, mail)
+				sender.Send(mail)
+			} else {
+				myLog.FailOnError(dbResponse.Error, dbResponse.Message)
+			}
 		}
 	}()
 
-	myLogger.Print("Waiting for messages. To exit press CTRL+C")
+	myLog.Print("To Close The Project Press To 'CTRL+C'")
 	<-forever
 }
