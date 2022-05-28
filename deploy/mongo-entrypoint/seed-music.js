@@ -1,13 +1,12 @@
 print('===============JAVASCRIPT===============');
-print('Count of rows in test collection: ' + db.test.count());
+print('Count of rows in User collection: ' + db.User.count());
 
-db.test.insert({ myfield: 'test1', anotherfield: 'TEST1' });
-db.test.insert({ myfield: 'test2', anotherfield: 'TEST2' });
+db.User.insert({ id: '1', username: 'admin', password: "psw", isadmin: true });
 
 print('===============AFTER JS INSERT==========');
-print('Count of rows in test collection: ' + db.test.count());
+print('Count of rows in User collection: ' + db.User.count());
 
-alltest = db.test.find();
+alltest = db.User.find();
 while (alltest.hasNext()) {
   printjson(alltest.next());
 }

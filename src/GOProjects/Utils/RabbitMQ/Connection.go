@@ -1,9 +1,9 @@
 package RabbitMQ
 
 import(
-	myLog "bulkmail/packages/Utils/Logger"
-
 	amqp "github.com/rabbitmq/amqp091-go"
+
+	myLog "bulkmail/packages/Utils/Logger"
 )
 
 func AddToQueue(body []byte){
@@ -11,10 +11,12 @@ func AddToQueue(body []byte){
 	conn, err := amqp.Dial("amqp://root:root@localhost:5672")
 	myLog.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
+
 	//RabbitMq Channell
 	ch, err := conn.Channel()
 	myLog.FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
+	
 	//RabbitMq queue declare
 	q, err := ch.QueueDeclare(
 		"BulkMail",	//name
@@ -24,7 +26,6 @@ func AddToQueue(body []byte){
 		false, 		//no-wait
 		nil, 		//arguments
 	)
-
 	myLog.FailOnError(err, "Failed to declare a queue")
 
 	//Publish data
@@ -37,6 +38,5 @@ func AddToQueue(body []byte){
 			ContentType: "text/plain",
 			Body: body,
 		})
-
 	myLog.FailOnError(er, "Failed to publish a message")
 }

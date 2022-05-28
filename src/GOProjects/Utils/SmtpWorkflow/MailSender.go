@@ -1,4 +1,4 @@
-package MailSender
+package SmtpWorkflow
 
 import(
 	"net/smtp"
@@ -10,7 +10,7 @@ import(
 var smtpHost = "smtp.gmail.com"//smtp.ethereal.email
 var smtpPort = "587"
 
-func Send(mail Models.Mail){
+func Send(mail Models.MailModel){
 	auth := smtp.PlainAuth("", mail.SenderEmail, mail.SenderEmailPsw, smtpHost)
 	err := smtp.SendMail(smtpHost + ":" + smtpPort, auth, mail.SenderEmail, mail.ArriveEmails, []byte(mail.MailText))
 	//Content-Type: text/plain; charset=utf-8\nFrom: name surname <info@test.email>\nTo: Name Surname <testmail@mail.com>\nSubject: Test Subject\n\nTest Body

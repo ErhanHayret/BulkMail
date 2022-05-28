@@ -1,7 +1,6 @@
 package Logger
 
 import(
-	//Local Packages
 	"log"
 )
 

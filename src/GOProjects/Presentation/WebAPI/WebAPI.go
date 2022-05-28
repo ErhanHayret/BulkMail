@@ -4,11 +4,13 @@ import(
     "net/http"
     "log"
     "sync"
+    
+    "github.com/gorilla/mux"
 
-    "bulkmail/packages/Business"
+    mailBus "bulkmail/packages/Business/MailBusiness"
+    userBus "bulkmail/packages/Business/UserBusiness"
     eLog "bulkmail/packages/Utils/Logger"
 
-    "github.com/gorilla/mux"
 )
 
 func WebAPI(wg *sync.WaitGroup) {
@@ -16,10 +18,12 @@ func WebAPI(wg *sync.WaitGroup) {
     
     router := mux.NewRouter().StrictSlash(true)
 
-    router.HandleFunc("/SendMail", Business.AddToQueue).Methods("POST")
-    router.HandleFunc("/GetAllMails", Business.GetAllMails).Methods("GET")
-    router.HandleFunc("/GetMailById/{id}", Business.GetMailById).Methods("GET")
-    router.HandleFunc("/GetMailBySender/{adress}", Business.GetMailsBySender).Methods("GET")
+    router.HandleFunc("/SendMail", mailBus.SendMail).Methods("POST")
+    router.HandleFunc("/GetAllMails", mailBus.GetAllMails).Methods("GET")
+    router.HandleFunc("/GetMailById/{id}", mailBus.GetMailById).Methods("GET")
+    router.HandleFunc("/GetMailBySender/{adress}", mailBus.GetMailsBySender).Methods("GET")
+
+    router.HandleFunc("/GetToken", userBus.GetToken).Methods("POST")
     
     eLog.Print("Server Started. Port: 10000")
     log.Fatal(http.ListenAndServe(":10000", router))

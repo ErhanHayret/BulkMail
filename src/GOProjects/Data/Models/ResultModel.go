@@ -1,7 +1,7 @@
 package Models
 
-type StatusResult struct{
+type ResultModel struct{
 	Message	string 	`json:"message`
 	Status 	bool	`json:"status`
-	Error 	error	`json:"error`
+	StatusCode 	int		`json:"statusCode`
 }

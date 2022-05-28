@@ -4,7 +4,7 @@ import(
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Mail struct {
+type MailModel struct {
 	Id				primitive.ObjectID	`json:"id,omitempty"	bson:"_id"`
 	MailText		string 				`json:"mailText"		bson:"mail_test"`
 	SenderEmail		string				`json:"senderEmail" 	bson:"sender_email"`
