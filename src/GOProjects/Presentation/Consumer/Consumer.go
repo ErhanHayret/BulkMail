@@ -8,8 +8,8 @@ import(
 
 	"bulkmail/packages/Data/Models"
 	sender "bulkmail/packages/Utils/SmtpWorkflow"
-	myMongo "bulkmail/packages/DataAccess/MongoDb"
 	eLog "bulkmail/packages/Utils/Logger"
+	bus "bulkmail/packages/Business/ConsumerBusiness"
 )
 
 func Consumer(wg *sync.WaitGroup) {
@@ -58,11 +58,9 @@ func Consumer(wg *sync.WaitGroup) {
 				eLog.FailOnError(err, "Consumer can't unmarshall data")
 			}
 			
-			collection, dbResponse := myMongo.GetClient("MailDb", "Mail")
-			if dbResponse.Status == true{
-				myMongo.InsertOne(collection, mail)
-				sender.Send(mail)
-			} else {
+			dbResponse := bus.Insert(mail)
+			sender.Send(mail)
+			if dbResponse.Status == false{
 				eLog.FailOnError(nil, dbResponse.Message)
 			}
 		}

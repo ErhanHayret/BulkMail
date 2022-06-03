@@ -2,6 +2,11 @@ package JwtTokenBusiness
 
 import(
 	"time"
+	"fmt"
+	"net/http"
+	"encoding/json"
+	"strings"
+	"io/ioutil"
 
 	"github.com/dgrijalva/jwt-go"
 
@@ -10,68 +15,96 @@ import(
 	mongo "bulkmail/packages/DataAccess/MongoDb"
 )
 
-var claim Models.ClaimsModel
-var result Models.ResultModel
 var collection, dbResponse = mongo.GetClient("UserDb", "User")
 
-func CreateNewToken(userDto Dtos.UserDto) (Models.TokenModel, Models.ResultModel) {
-	var tokenModel Models.TokenModel
-	var tokenString string
-	var accessTokenString string
+func CreateToken(w http.ResponseWriter, r *http.Request){
+	var userDto Dtos.UserDto
 	var err error
-	user, respone := mongo.FindUser(collection, userDto)
+	td := &Models.TokenModel{}
 
-	if respone.StatusCode == 200 {
-		jwtKey := []byte("Bu_Asiri_Gizli_Bir_Sifredir")//Token secret
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	json.Unmarshal(reqBody, &userDto)
 
-		//Token
-		tokenExpTime := time.Now().Add(time.Minute * 30)//It's define expire time to 30 minutes
-		tokenAttribute := &Models.ClaimsModel{
-			StandardClaims: jwt.StandardClaims{
-			 	ExpiresAt: tokenExpTime.Unix(),
-			},
-			UserName: user.UserName,
-			Password: user.Password,
-			IsAdmin: user.IsAdmin,
-		}
-		tokenClaim := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenAttribute)
-		tokenString, err = tokenClaim.SignedString(jwtKey)
+	user, response := mongo.FindUser(collection, userDto)
+	if response.StatusCode == 200 {
+		jwtKey := []byte("Bu_Asiri_Gizli_Bir_Sifredir")//Token secret need env
+		//Expire times
+		td.AtExpire = time.Now().Add(time.Minute * 30).Unix()
+		td.RtExpire = time.Now().Add(time.Hour * 24 * 7).Unix()
+
+		//Access Token
+		atClaims := jwt.MapClaims{}
+		atClaims["userName"] = user.UserName
+		atClaims["isAdmin"] = user.IsAdmin
+
+		aToken := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+		td.AccessToken, err = aToken.SignedString(jwtKey)
  		if err != nil {
-			result.Message = "Token can't created"
-			result.Status = false
-			result.StatusCode = 500
-	  		return tokenModel, result
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode("Access token not signed")
+			return
 		}
 
-		//AccessToken
-		tokenExpTime = time.Now().Add(time.Hour * 24 * 7)//It's define expire time to 7 days
-		accessAttribute := &Models.ClaimsModel{
-			StandardClaims: jwt.StandardClaims{
-			 	ExpiresAt: tokenExpTime.Unix(),
-			},
-			UserName: user.UserName,
-			Password: user.Password,
-			IsAdmin: user.IsAdmin,
-		}
-		accessClaim := jwt.NewWithClaims(jwt.SigningMethodHS256, accessAttribute)
-		accessTokenString, err = accessClaim.SignedString(jwtKey)
+		//Refresh Token
+		rtClaims := jwt.MapClaims{}
+		rtClaims["userName"] = user.UserName
+		rtClaims["password"] = user.Password
+		rtClaims["isAdmin"] = user.IsAdmin
+
+		rToken := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
+		td.RefreshToken, err = rToken.SignedString(jwtKey)
  		if err != nil {
-			result.Message = "Access token can't created"
-			result.Status = false
-			result.StatusCode = 500
-	  		return tokenModel, result
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode("Refresh token not signed")
+			return
 		}
 	} else {
-		result.Message = "User not found"
-		result.Status = false
-		result.StatusCode = 404
-		return tokenModel, result
+		w.WriteHeader(response.StatusCode)
+		json.NewEncoder(w).Encode(response.Message)
+		return
 	}
-	
-	tokenModel.Token = tokenString
-	tokenModel.AccessToken = accessTokenString
-	result.Message = "Success"
-	result.Status = true
-	result.StatusCode = 200
-	return tokenModel, result
+	tokens := map[string]string{
+		"accessToken": td.AccessToken,
+		"refreshToken": td.RefreshToken,
+	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(tokens)
+}
+
+func TokenIsVaild(w http.ResponseWriter, r *http.Request){
+	bearToken := r.Header.Get("Authorization")
+	tokenArr := strings.Split(bearToken, " ")
+	if len(tokenArr) != 2 {
+		w.WriteHeader(http.StatusUnauthorized )
+		json.NewEncoder(w).Encode("Token not found")
+		return
+	}
+
+	secret := []byte("Bu_Asiri_Gizli_Bir_Sifredir")
+
+	token, err := jwt.Parse(tokenArr[1], func(token *jwt.Token) (interface{}, error){
+		if _, ok :=token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Token not parsed")
+		}
+		return secret, nil
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized )
+		json.NewEncoder(w).Encode("Token is expired")
+		return
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		if claims["IsAdmin"] == true {
+			w.WriteHeader(http.StatusOK )
+			json.NewEncoder(w).Encode("admin")
+			return
+		} else if claims["IsAdmin"] == false {
+			w.WriteHeader(http.StatusOK )
+			json.NewEncoder(w).Encode("user")
+			return
+		}
+	}
+	w.WriteHeader(http.StatusUnauthorized )
+	json.NewEncoder(w).Encode("Not Valid")
 }

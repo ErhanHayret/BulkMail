@@ -1,6 +1,8 @@
 package Models
 
 type TokenModel struct {
-	Token 		string	`json:"token"`
-	AccessToken	string	`json:"accessToken"`
+	AccessToken		string
+	RefreshToken	string
+	AtExpire		int64
+	RtExpire		int64
 }

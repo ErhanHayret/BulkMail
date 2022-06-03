@@ -6,7 +6,6 @@ import(
 	"io/ioutil"
 	
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	model	"bulkmail/packages/Data/Models"
 	rabbit 	"bulkmail/packages/Utils/RabbitMQ"
@@ -21,7 +20,6 @@ func SendMail(w http.ResponseWriter, r *http.Request){
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	json.Unmarshal(reqBody, &mail)
-	mail.Id=primitive.NewObjectID()
 	body, err := json.Marshal(mail)
 	if err != nil{
 		result.StatusCode = 500
@@ -59,8 +57,7 @@ func GetMailById(w http.ResponseWriter, r*http.Request){
 		return
 	}
 
-	objId, _ := primitive.ObjectIDFromHex(id)
-	result, dbResponse := mongo.FindMailById(collection, objId)	
+	result, dbResponse := mongo.FindMailById(collection, id)	
 
 	w.WriteHeader(dbResponse.StatusCode)
 	if dbResponse.Status == false {

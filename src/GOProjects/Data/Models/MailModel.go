@@ -1,11 +1,11 @@
 package Models
 
 import(
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	// "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MailModel struct {
-	Id				primitive.ObjectID	`json:"id,omitempty"	bson:"_id"`
+	Id				string	`json:"id,omitempty"	bson:"_id"`
 	MailText		string 				`json:"mailText"		bson:"mail_test"`
 	SenderEmail		string				`json:"senderEmail" 	bson:"sender_email"`
 	SenderEmailPsw	string				`json:"senderEmailPsw"	bson:"sender_email_psw"`

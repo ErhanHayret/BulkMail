@@ -1,12 +1,7 @@
-package Models
+package Dtos
 
-import(
-	"github.com/dgrijalva/jwt-go"
-)
-
-type ClaimsModel struct {
+type TokenRequestDto struct {
 	UserName 	string 	`json:"username"`
 	Password	string 	`json:"password"`
 	IsAdmin 	bool 	`json:"isAdmin"`
-	jwt.StandardClaims
 }
