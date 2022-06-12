@@ -1,0 +1,19 @@
+﻿@page "/login/login"
+@inject NavigationManager navManager
+
+<PageTitle>Toplu Mail Giriş</PageTitle>
+
+<h1>GİRİŞ</h1>
+
+<p><b>Kullanıcı Adı:</b></p>
+
+<input @bind="@UserName" />
+
+<p><b>Şifre:</b></p>
+
+<input type="password" @bind="@Password" />
+<br />
+
+<p style="color:red;"><b>@UserException</b></p>
+
+<button @onclick="LoginClick">Giriş Yap</button>

@@ -1,0 +1,49 @@
+﻿@page "/mail/mail"
+
+<PageTitle>@TitleString</PageTitle>
+
+<h1>Mail Gönder</h1>
+
+<p><b>Gönderici Mail Adresi:</b></p>
+
+<input @bind="@SenderEmail" />
+
+<p><b>Gönderici Şifresi:</b></p>
+
+<input type="password" @bind="@Password" />
+
+<p><b>Konu:</b></p>
+
+<input @bind="@Subject" />
+
+<p><b>Mesaj:</b></p>
+
+<textarea rows="5" cols="50" @bind="@Message" />
+
+<p><b>Alıcılar:</b></p>
+
+@for (int i = 0; i < ArriveList.Count; i++)
+{
+    int index = i;
+    <input type="text" @onchange="(e) => Update(index, e.Value.ToString())" value="@ArriveList[i]" />
+    <button @onclick="()=>Remove(index)">Kaldır</button>
+    <br/>
+}
+<br/>
+<button @onclick="Add">Alıcı Ekle</button>
+
+<br/>
+<br/>
+<p style="color:red"><b>@MailException</b></p>
+
+<br/>
+<br/>
+<button @onclick="@Send">Gönder</button>
+
+@code {
+    public List<string> ArriveList = new List<string>();
+
+    private void Add() => ArriveList.Add("");
+    private void Update(int i, string value) => ArriveList[i] = value;
+    private void Remove(int i) => ArriveList.RemoveAt(i);
+}

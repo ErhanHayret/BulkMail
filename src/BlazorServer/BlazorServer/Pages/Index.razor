@@ -1,0 +1,11 @@
+﻿@page "/"
+@inject NavigationManager NavigationManager
+
+<h1 @onclick="gologin">Go to Login </h1>
+
+@code {
+    public void gologin()
+    {
+        NavigationManager.NavigateTo("login/login");
+    }
+}
