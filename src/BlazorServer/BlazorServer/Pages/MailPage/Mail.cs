@@ -59,6 +59,10 @@ namespace BlazorServer.Pages.MailPage
         {
             var result = await localStore.GetAsync<string>("UserName");
             userName = result.Success ? result.Value : "";
+            if (string.IsNullOrEmpty(userName))
+            {
+                navManager.NavigateTo("login/login");
+            }
         }
     }
 }

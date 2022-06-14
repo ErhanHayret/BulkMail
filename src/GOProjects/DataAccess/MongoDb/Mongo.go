@@ -63,6 +63,7 @@ func FindAllMails(collection *mongo.Collection) ([]*model.MailModel, model.Resul
 		return mails, result
 	}
 	result.Status = true
+	result.StatusCode=200
 	return mails, result
 }
 
@@ -83,6 +84,7 @@ func FindMailById(collection *mongo.Collection, id string) (model.MailModel, mod
 				return mail, result
 			}
 			result.Status = true
+			result.StatusCode=200
 			return mail, result
 		}
 	}
@@ -115,6 +117,7 @@ func FindBySender(collection *mongo.Collection, adress string) ([]*model.MailMod
 		return mails, result
 	}
 	result.Status = true
+	result.StatusCode=200
 	return mails, result
 }
 

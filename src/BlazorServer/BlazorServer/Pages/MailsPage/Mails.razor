@@ -1,0 +1,30 @@
+﻿@page "/mails/mails"
+
+<h3>Mails</h3>
+
+<table style="border:1px solid black;">
+    <tr>
+        <th>Gönderen</th>
+        <th>Başlık</th>
+        <th>Mesaj</th>
+    </tr>
+    @for (int i = 0; i < MailList.Count; i++)
+    {
+        var subj = @MailList[i].MailText.Split("Subject:")[1].Split("\n\n");
+        <tr>
+            <td>@MailList[i].SenderEmail</td>
+            <td>@subj[0]</td>
+            <td>@subj[1]</td>
+        </tr>
+    }
+</table>
+
+@code {
+
+}
+
+<style>
+    table, th, td {
+        border: 1px solid black;
+    }
+</style>

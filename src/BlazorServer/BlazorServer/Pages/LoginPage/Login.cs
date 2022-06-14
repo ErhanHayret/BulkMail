@@ -9,6 +9,14 @@ namespace BlazorServer.Pages.LoginPage
         public string UserName { get; set; }
         public string Password { get; set; }
         public string UserException { get; set; }
+        public string TitleString
+        {
+            get
+            {
+                getStore();
+                return "Toplu Mail Giriş";
+            }
+        }
 
         [Inject]
         private ProtectedLocalStorage localStore { get; set; }
@@ -40,6 +48,16 @@ namespace BlazorServer.Pages.LoginPage
                 }
             }
 
+        }
+
+        private async void getStore()
+        {
+            var result = await localStore.GetAsync<string>("UserName");
+            string str = result.Success ? result.Value : "";
+            if (!string.IsNullOrEmpty(str))
+            {
+                navManager.NavigateTo("mail/mail");
+            }
         }
     }
 }

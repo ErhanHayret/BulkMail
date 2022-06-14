@@ -1,5 +1,6 @@
-﻿@inherits LayoutComponentBase
-
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inherits LayoutComponentBase
+@inject ProtectedLocalStorage localStore
 <PageTitle>BlazorServer</PageTitle>
 
 <div class="page">
@@ -8,8 +9,13 @@
     </div>
 
     <main>
+
         <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <p>@isVisible</p>
+            @if (!string.IsNullOrEmpty(visible))
+            {
+                <button @onclick="@Exit">Çıkış</button>
+            }
         </div>
 
         <article class="content px-4">
@@ -17,3 +23,24 @@
         </article>
     </main>
 </div>
+
+@code {
+    private string isVisible
+    {
+        get
+        {
+            getStore();
+            return "";
+        }
+    }
+    private string visible;
+    private async void Exit()
+    {
+        await localStore.DeleteAsync("UserName");
+    }
+    private async void getStore()
+    {
+        var result = await localStore.GetAsync<string>("UserName");
+        visible = result.Success ? result.Value : "";
+    }
+}
